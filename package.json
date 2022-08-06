@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "wrangler": "^2.0.24",
+    "@cipherstash/stashjs": "0.6.0"
+  }
+}
