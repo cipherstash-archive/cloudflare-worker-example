@@ -1,4 +1,5 @@
-use serde_json::json;
+
+use cipherstash_client::record::Record;
 use worker::*;
 use ore_rs::{
     ORECipher,  // Main ORE Cipher trait
@@ -6,8 +7,13 @@ use ore_rs::{
     scheme::bit2::OREAES128 // Specific scheme we want to use
 };
 use hex_literal::hex;
-use rand_chacha::ChaCha20Rng;
-
+use cipherstash_client::collection;
+use cipherstash_client::indexer::*;
+use cipherstash_client::indexer::mapping::{Mapping, MappingWithMeta};
+// FIXME: The module probably could be named something other than decoder (maybe field or types?)
+use cipherstash_client::record::decoder::{
+    RecordSchema, DataType, SchemaField
+};
 mod utils;
 
 struct EncryptError {
@@ -55,6 +61,50 @@ fn do_encrypt_get<D>(ctx: &RouteContext<D>) -> std::result::Result<String, Encry
     Ok(hex::encode(result))
 }
 
+fn collection_schema() -> CollectionSchema {
+    CollectionSchema {
+        schema: RecordSchema {
+            map: collection! {
+                "title" => SchemaField::DataType(DataType::String),
+                "runningTime" => SchemaField::DataType(DataType::Uint64)
+            },
+        },
+        indexes: collection! {
+            "exactTitle" => MappingWithMeta {
+                mapping: Mapping::Exact { field: "title".into() },
+                index_id: [0;16],
+                prf_key: [0;16],
+                prp_key: [0;16]
+            },
+            "runningTime" => MappingWithMeta {
+                mapping: Mapping::Range { field: "runningTime".into() },
+                index_id: [0;16],
+                prf_key: [0;16],
+                prp_key: [0;16]
+            }
+        },
+    }
+}
+
+fn index_record() {
+    let schema = collection_schema();
+    let mut indexer = RecordIndexer::from_collection_schema(schema).unwrap();
+
+    let vectors = indexer
+    .encrypt(&Record {
+        id: [163,  98, 105, 100, 216, 64,
+            80, 117, 189,  53, 179, 82,
+            84,  65,   2, 178],
+        fields: collection! {
+            "title" => "Hello!",
+            "runningTime" => 230
+        },
+    })
+    .unwrap();
+
+    console_debug!("VECTORS: {:?}", vectors);
+}
+
 #[event(fetch)]
 pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Response> {
     log_request(&req);
@@ -72,6 +122,9 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
     // Environment bindings like KV Stores, Durable Objects, Secrets, and Variables.
     router
         .get("/:input", |_, ctx| {
+
+            index_record();
+
             match do_encrypt_get(&ctx) {
                 Ok(result) => return Response::ok(format!("OK: {}", result)),
                 Err(EncryptError { msg }) => Response::error(msg, 400)
