@@ -1,4 +1,5 @@
 
+use cipherstash_client::grpc::client::Client;
 use cipherstash_client::record::Record;
 use worker::*;
 use ore_rs::{
@@ -14,6 +15,13 @@ use cipherstash_client::indexer::mapping::{Mapping, MappingWithMeta};
 use cipherstash_client::record::decoder::{
     RecordSchema, DataType, SchemaField
 };
+
+use cipherstash_client::grpc::{
+    api,
+    client,
+    tonic
+};
+
 mod utils;
 
 struct EncryptError {
@@ -105,6 +113,33 @@ fn index_record() {
     console_debug!("VECTORS: {:?}", vectors);
 }
 
+// TODO: Move this shit to the client! make an interface for Get/Put etc
+async fn send_request() {
+    let connection = Client::new("https://ap-southeast-2.aws.stashdata.net".to_string());
+
+    let request = api::documents::GetRequest{
+        collection_id: [
+            31, 234, 109, 160, 130,
+           107,  65, 203, 166, 255,
+            58,  19, 217, 161, 246,
+           229
+         ].into(),
+        id: [
+            97, 244, 195,   5, 19, 153,
+            71, 186, 133,  15, 88, 138,
+           129,  64, 251, 179
+         ].into()
+    };
+
+    let mut client =  api::api_client::ApiClient::new(connection);
+
+    //client.get(request).await.unwrap();
+    match client.get(request).await {
+        Ok(ret) => console_debug!("RESPONSE OK: {:?}", ret.into_inner()),
+        Err(e) => console_error!("ERROR: {:?}", e)
+    }
+}
+
 #[event(fetch)]
 pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Response> {
     log_request(&req);
@@ -121,9 +156,10 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
     // functionality and a `RouteContext` which you can use to  and get route parameters and
     // Environment bindings like KV Stores, Durable Objects, Secrets, and Variables.
     router
-        .get("/:input", |_, ctx| {
+        .get_async("/:input", |_, ctx| async move {
 
             index_record();
+            send_request().await;
 
             match do_encrypt_get(&ctx) {
                 Ok(result) => return Response::ok(format!("OK: {}", result)),
