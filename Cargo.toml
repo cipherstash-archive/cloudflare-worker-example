@@ -22,13 +22,18 @@ hex = "0.4.3"
 cipherstash-client = { version = "0.3.0", path = "/Users/dan/Projects/CipherStash/cipherstash-rs/packages/cipherstash-client" }
 # Pin this version as both worker and grpc-web-client use it
 # And if the version is different then we will get linking errors (weird C + WASM shit)
-wasm-streams = { version = "0.2.0" }
+wasm-streams = { version = "0.2.3" }
+thiserror = "1.0.32"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
 # code size when deploying.
 console_error_panic_hook = { version = "0.1.1", optional = true }
+
+[dependencies.uuid]
+version = "1.1.2"
+features = ["v4"]
 
 [profile.release]
 # Tell `rustc` to optimize for small code size.
