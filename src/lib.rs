@@ -1,5 +1,7 @@
 
+use cipherstash_client::collection;
 use cipherstash_client::grpc::tonic::codegen::http::request;
+use serde_json::to_string;
 use thiserror::Error;
 use cipherstash_client::grpc::client::Client;
 use cipherstash_client::grpc::tonic::metadata::AsciiMetadataKey;
@@ -53,7 +55,7 @@ fn get_record_id<D>(ctx: &RouteContext<D>) -> std::result::Result<Uuid, RequestE
     return Err(RequestError::InvalidID);
 }
 
-/*fn collection_schema() -> CollectionSchema {
+fn collection_schema() -> CollectionSchema {
     CollectionSchema {
         schema: RecordSchema {
             map: collection! {
@@ -64,19 +66,19 @@ fn get_record_id<D>(ctx: &RouteContext<D>) -> std::result::Result<Uuid, RequestE
         indexes: collection! {
             "exactTitle" => MappingWithMeta {
                 mapping: Mapping::Exact { field: "title".into() },
-                index_id: [0;16],
+                index_id: *Uuid::parse_str("65e381f5-18dc-41af-8a89-d0641b09accc").unwrap().as_bytes(),
                 prf_key: [0;16],
                 prp_key: [0;16]
             },
             "runningTime" => MappingWithMeta {
                 mapping: Mapping::Range { field: "runningTime".into() },
-                index_id: [0;16],
+                index_id: *Uuid::parse_str("f83f2cf4-4fc9-4147-9c39-7b99eafa74df").unwrap().as_bytes(),
                 prf_key: [0;16],
                 prp_key: [0;16]
             }
         },
     }
-}*/
+}
 
 /*fn index_record() {
     let schema = collection_schema();
@@ -156,30 +158,73 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
     // provide arbitrary data that will be accessible in each route via the `ctx.data()` method.
     let router = Router::new();
 
+
     // Add as many routes as your Worker needs! Each route will get a `Request` for handling HTTP
     // functionality and a `RouteContext` which you can use to  and get route parameters and
     // Environment bindings like KV Stores, Durable Objects, Secrets, and Variables.
     router
-        .get_async("/:id", |req, ctx| async move {
-            //let jwt = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkEwOVdodlFoV3h1emRjS2ZwVHFUdSJ9.eyJodHRwczovL2F3cy5hbWF6b24uY29tL3RhZ3MiOnsicHJpbmNpcGFsX3RhZ3MiOnsid29ya3NwYWNlIjpbIndzOkNaUlFKWk5CV0xTQzNaSSJdfX0sImlzcyI6Imh0dHBzOi8vYXV0aC5jaXBoZXJzdGFzaC5jb20vIiwic3ViIjoiYXV0aDB8NjE1MjZhMDRhODllOGIwMDY4ZTQ2ODQ2IiwiYXVkIjoiYXAtc291dGhlYXN0LTIuYXdzLnN0YXNoZGF0YS5uZXQiLCJpYXQiOjE2NjAyNzA5OTksImV4cCI6MTY2MDM1NzM5OSwiYXpwIjoiQ3RZOUROR29uZ29TdlphQXdiYjZzdzBIcjdHbDdwZzciLCJzY29wZSI6ImNvbGxlY3Rpb24uY3JlYXRlIGNvbGxlY3Rpb24uZGVsZXRlIGNvbGxlY3Rpb24uaW5mbyBjb2xsZWN0aW9uLmxpc3QgZG9jdW1lbnQucHV0IGRvY3VtZW50LmRlbGV0ZSBkb2N1bWVudC5nZXQgZG9jdW1lbnQucXVlcnkgd3M6Q1pSUUpaTkJXTFNDM1pJIG9mZmxpbmVfYWNjZXNzIn0.X0tXfahA4NLbcHjoys45eJFHX3qOSNcpzNTo2RT_h5Xy5pQ9kKEuvwx6BpuweTL2n4-CMUSxX1yzI_iTi_A1ZKkY4lGKit-ebNMUtrBJAa7DV1y3rehA7T5H4HO4Wr1NTS5xR0_ReNu5wG_UmRo2dIjTiXxKaUnOwzg7cGzCBgdlAVPS6jOePy4UGoxnl6hn0bfGI8ygACS7pQQj5GCcbd8L8SdgOW3YgaH7wrZD6YzDjALLj3DmxzvY4W-AKP6UuI9hIDTt8bsaM2_ELA2diG2prA3Z92L2WFNjeqL-rZ5TG5bR2N45pKLPozHERY5oP3hODRtFlak8BbYcvuIqWg";
-
+        .post_async("/", |req, ctx| async move {
+            let schema = collection_schema();
             let jwt = get_token(&req).unwrap();
+
+            let collection_id = Uuid::parse_str(
+                &ctx.env
+                    .var("COLLECTION_ID")?
+                    .to_string()
+                ).map_err(|_| Error::Internal("Bad or missing collection ID".into()))?;
+        
+            console_debug!("Using Collection ID {:?}", collection_id);
+
+            let api = api::Api::connect(
+                schema,
+                collection_id,
+                "https://ap-southeast-2.aws.stashdata.net".to_string(),
+                jwt.to_string()
+            );
+
+            let vectors = api.put(Record {
+                id: [163,  98, 105, 100, 216, 64,
+                    80, 117, 189,  53, 179, 82,
+                    84,  65,   2, 178],
+                fields: collection! {
+                    "title" => "Hello!",
+                    "runningTime" => 230
+                }
+            }).await.unwrap();
+
+            console_debug!("RETURN: {:?}", vectors);
+
+            return Response::ok("SAVED");
+        })
+        .get_async("/:id", |req, ctx| async move {
+            let schema = collection_schema();
+            let jwt = get_token(&req).unwrap();
+
+            let collection_id = Uuid::parse_str(
+                &ctx
+                    .env
+                    .var("COLLECTION_ID")?
+                    .to_string()
+                ).map_err(|_| Error::Internal("Bad or missing collection ID".into()))?;
+        
+            console_debug!("Using Collection ID {:?}", collection_id);
 
             // TODO: Don't unwrap
             let api = api::Api::connect(
-                [128, 203, 243, 157, 31, 213, 67, 180, 139, 21, 110, 57, 225, 200, 215, 199],
+                schema,
+                collection_id,
                 "https://ap-southeast-2.aws.stashdata.net".to_string(),
                 jwt.to_string()
             );
 
             //send_request().await;
-            match get_record_id(&ctx) {
+            return match get_record_id(&ctx) {
                 Ok(result) => {
                     let raw = api.get(*result.as_bytes()).await.unwrap();
-                    return Response::ok(format!("OK: {:?}", raw));
+                    Response::ok(format!("OK: {:?}", raw))
                 },
                 Err(e) => Response::error(format!("Error: {}", e), 400)
-            }
+            };
         })
         .run(req, env)
         .await
