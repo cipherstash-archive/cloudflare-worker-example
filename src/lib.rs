@@ -39,23 +39,17 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
         })
         .get_async("/:id", |_req, ctx| async move {
             let schema = schema::collection_schema();
-            // TODO: Chain or?
-            if let Some(input_str) = &ctx.param("id") {
-                let id = Uuid::parse_str(&input_str.to_string());
-                if let Err(e) = id {
-                    return Response::error(format!("Invalid ID: {}", e.to_string()), 400);
-                }
-
+            if let Some(id) = &ctx.param("id").and_then(|str| Uuid::parse_str(str).ok()) {
                 let (config, authn) = ctx.data;
                 let mut api = api::Api::connect(config, schema, authn);
 
-                return match api.get(id.unwrap()).await {
+                return match api.get(*id).await {
                     Ok(record) => Response::from_json::<Movie>(&record.try_into()?),
                     // TODO: Handle more errors
                     Err(err) => Response::error(err.to_string(), 500),
                 };
             } else {
-                return Response::error("Missing ID parameter", 400);
+                return Response::error("Missing or invalid ID parameter", 400);
             }
         })
         .run(req, env)
