@@ -45,7 +45,6 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
 
                 return match api.get(*id).await {
                     Ok(record) => Response::from_json::<Movie>(&record.try_into()?),
-                    // TODO: Handle more errors
                     Err(err) => Response::error(err.to_string(), 500),
                 };
             } else {
