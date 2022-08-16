@@ -1,6 +1,6 @@
+use std::convert::TryInto;
 use cipherstash_client::collection;
 use cipherstash_client::indexer::CollectionSchema;
-use cipherstash_client::record::Record;
 use cipherstash_client::api;
 use cipherstash_client::indexer::mapping::{Mapping, MappingWithMeta};
 use uuid::Uuid;
@@ -8,9 +8,12 @@ use worker::*;
 // FIXME: The module probably could be named something other than decoder (maybe field or types?)
 use cipherstash_client::record::decoder::{DataType, RecordSchema, SchemaField};
 
+
 mod utils;
 mod errors;
-use crate::utils::*;
+mod movie;
+use self::movie::Movie;
+use self::utils::*;
 use self::errors::RequestError;
 
 
@@ -68,9 +71,13 @@ fn get_token(req: &Request) -> std::result::Result<String, RequestError> {
     return Err(RequestError::Unauthorized);
 }
 
+
 #[event(fetch)]
 pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Response> {
     log_request(&req);
+
+    // TODO: Set data on router
+    // TODO: Unwraps and router errors
 
     // Optionally, get more helpful error messages written to the console in the case of a panic.
     utils::set_panic_hook();
@@ -84,28 +91,22 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
     // functionality and a `RouteContext` which you can use to  and get route parameters and
     // Environment bindings like KV Stores, Durable Objects, Secrets, and Variables.
     router
-        .post_async("/", |req, ctx| async move {
+        .post_async("/", |mut req, ctx| async move {
             let schema = collection_schema();
             let jwt = get_token(&req).unwrap();
             let config = load_api_config(&ctx)?;
             let mut api = api::Api::connect(config, schema, jwt);
 
-            let vectors = api
-                .put(Record {
-                    id: [
-                        163, 98, 105, 100, 216, 64, 80, 117, 189, 53, 179, 82, 84, 65, 2, 178,
-                    ],
-                    fields: collection! {
-                        "title" => "Hello!",
-                        "runningTime" => 230
-                    },
-                })
+            let movie: Movie = req.json().await?;
+            let record = movie.into();
+
+            let created = api
+                .put(record)
                 .await
                 .unwrap();
+                //.map_err(|e| Response::error(e.to_string(), 400))?;
 
-            console_debug!("RETURN: {:?}", vectors);
-
-            return Response::ok("SAVED");
+            return Response::from_json(&created);
         })
         .get_async("/:id", |req, ctx| async move {
             let schema = collection_schema();
@@ -115,8 +116,15 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
 
             return match get_record_id(&ctx) {
                 Ok(result) => {
-                    let raw = api.get(result).await.unwrap();
-                    Response::ok(format!("OK: {:?}", raw))
+                    let movie: Movie =
+                        api
+                        .get(result)
+                        .await
+                        .unwrap()
+                        .try_into()
+                        .unwrap();
+
+                    Response::from_json(&movie)
                 }
                 Err(e) => Response::error(format!("Error: {}", e.to_string()), 400),
             };
