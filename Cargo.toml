@@ -24,6 +24,7 @@ cipherstash-client = { version = "0.3.0", path = "/Users/dan/Projects/CipherStas
 # And if the version is different then we will get linking errors (weird C + WASM shit)
 wasm-streams = { version = "0.2.3" }
 thiserror = "1.0.32"
+wasm-bindgen = "0.2.82"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

@@ -6,6 +6,7 @@ compatibility_date = "2022-01-20"
 [vars]
 WORKERS_RS_VERSION = "0.0.9"
 COLLECTION_ID = "5a950b3d-14c4-41c8-a5f6-ac866328bd4f"
+CIPHERSTASH_HOST = "https://ap-southeast-2.aws.stashdata.net"
 
 [build]
 command = "cargo install -q worker-build && worker-build --release" # required
