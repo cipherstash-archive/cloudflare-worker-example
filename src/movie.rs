@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
 use cipherstash_client::collection;
 use cipherstash_client::record::{Record, Value};
+use serde::{Deserialize, Serialize};
+use std::convert::TryFrom;
 use uuid::Uuid;
 
 // TODO: Let's make this User (more realistic)
@@ -11,7 +11,7 @@ pub(crate) struct Movie {
     id: Uuid,
     title: String,
     #[serde(rename = "runningTime")]
-    running_time: u64
+    running_time: u64,
 }
 
 impl From<Movie> for Record {
@@ -21,7 +21,7 @@ impl From<Movie> for Record {
             fields: collection!(
                 "title" => movie.title,
                 "runningTime" => movie.running_time
-            )
+            ),
         }
     }
 }
@@ -36,11 +36,11 @@ impl TryFrom<Record> for Movie {
                 return Ok(Movie {
                     id: Uuid::from_bytes(record.id),
                     title: title.to_string(),
-                    running_time: *running_time
-                })
+                    running_time: *running_time,
+                });
             }
         }
-        
+
         Err("Missing fields on Movie Record")
     }
 }

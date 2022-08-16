@@ -1,9 +1,8 @@
+use cfg_if::cfg_if;
 use cipherstash_client::api::{Config, SourceKey};
 use hex::FromHex;
 use uuid::Uuid;
-use worker::RouteContext;
-use cfg_if::cfg_if;
-use crate::RequestError;
+use worker::{console_log, Date, Env, Request};
 
 cfg_if! {
     // https://github.com/rustwasm/console_error_panic_hook#readme
@@ -16,31 +15,35 @@ cfg_if! {
     }
 }
 
-pub(crate) fn load_api_config<D>(ctx: &RouteContext<D>) -> Result<Config, RequestError> {
+pub(crate) fn load_config<D>(env: &Env) -> Result<Config, String> {
     let collection_id = Uuid::parse_str(
-        &ctx.env
-            .var("COLLECTION_ID")
-            .map_err(|_| RequestError::MissingCollectionId)?
+        &env.var("COLLECTION_ID")
+            .map_err(|_| "Missing Collection ID".to_string())?
             .to_string(),
     )
-    .map_err(|_| RequestError::MissingCollectionId)?;
+    .map_err(|_| "Missing Collection ID".to_string())?;
 
-    let host = &ctx
-        .env
+    let host = &env
         .var("CIPHERSTASH_HOST")
-        .map_err(|_| RequestError::ConfigError("Missing Host".into()))?
+        .map_err(|_| "Missing Host".to_string())?
         .to_string();
 
-    let key_string = &ctx
-        .env
+    let key_string = &env
         .secret("CIPHERSTASH_KEY")
-        .map_err(|_| RequestError::ConfigError("Missing Key".into()))?
+        .map_err(|_| "Missing Key".to_string())?
         .to_string();
 
-    let key = SourceKey::from_hex(key_string)
-        .map_err(|_| RequestError::ConfigError("Invalid source key".to_string()))?;
+    let key = SourceKey::from_hex(key_string).map_err(|_| "Invalid source key".to_string())?;
 
     Ok(Config::init(host.to_string(), collection_id, key))
 }
 
-
+pub(crate) fn log_request(req: &Request) {
+    console_log!(
+        "{} - [{}], located at: {:?}, within: {}",
+        Date::now().to_string(),
+        req.path(),
+        req.cf().coordinates().unwrap_or_default(),
+        req.cf().region().unwrap_or("unknown region".into())
+    );
+}
