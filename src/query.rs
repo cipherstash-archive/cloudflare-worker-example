@@ -5,15 +5,15 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 #[serde(tag = "op", rename_all = "kebab-case")]
 enum NameCondition {
-    Eq { value: String },
+    Match { value: String },
 }
 
 impl From<NameCondition> for Query {
     fn from(condition: NameCondition) -> Self {
         match condition {
-            NameCondition::Eq { value } => Query::Basic {
+            NameCondition::Match { value } => Query::Basic {
                 index_name: "name".to_string(),
-                kind: QueryKind::Exact {
+                kind: QueryKind::Match {
                     value: value.into(),
                 },
             },

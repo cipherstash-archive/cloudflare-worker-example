@@ -54,7 +54,7 @@ echo "Find the first 5 users born after 1960"
 query_users '{ "dob": { "op": "gt", "value": "1960-01-01T00:00:00.000Z" }, "limit": 5 }'
 
 echo "Find users that match a certain name"
-query_users '{ "name": { "op": "eq", "value": "Casey Greenfelder" } }'
+query_users '{ "name": { "op": "match", "value": "Casey Greenfelder" } }'
 
 echo "Find users with a hotmail email born after 1960"
 query_users '{ "email": { "op": "match", "value": "hotmail" }, "dob": { "op": "gt", "value": "1960-01-01T00:00:00.000Z" }, "limit": 5 }'

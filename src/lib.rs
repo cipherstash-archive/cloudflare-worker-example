@@ -19,8 +19,7 @@ struct CollectionSchemaWithId {
     schema: CollectionSchema,
 }
 
-#[event(fetch)]
-pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Response> {
+async fn handler(req: Request, env: Env, _ctx: worker::Context) -> Result<Response> {
     utils::log_request(&req);
     utils::set_panic_hook();
 
@@ -58,7 +57,7 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
 
             let query: UserQuery = req.json().await?;
 
-            let res = api.query(query.into()).await.unwrap();
+            let res = api.query(query.into()).await.map_err(|e| e.to_string())?;
 
             let users: Vec<User> = res
                 .records
@@ -83,4 +82,12 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
         })
         .run(req, env)
         .await
+}
+
+#[event(fetch)]
+pub async fn main(req: Request, env: Env, ctx: worker::Context) -> Result<Response> {
+    match handler(req, env, ctx).await {
+        Ok(x) => Ok(x),
+        Err(e) => Response::error(e.to_string(), 500),
+    }
 }
