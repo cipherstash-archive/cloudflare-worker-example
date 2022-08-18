@@ -26,7 +26,7 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
 
     let CollectionSchemaWithId { id, schema } =
         // Load User collection schema + keys
-        serde_json::from_str(include_str!("../users.collection.json"))?;
+        serde_json::from_str(include_str!("../users.annotated.json"))?;
 
     let config = utils::load_config(id, &env);
     if let Err(err) = config {
@@ -63,10 +63,7 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
             let users: Vec<User> = res
                 .records
                 .into_iter()
-                .map(|x| {
-                    console_debug!("{:?}", x);
-                    x.try_into()
-                })
+                .map(|x| x.try_into())
                 .collect::<std::result::Result<_, _>>()?;
 
             Response::from_json(&json!({ "users": users }))
