@@ -104,6 +104,16 @@ The annotated schema includes the IDs and keys used for indexing.
 Normally these are stored encrypted in the CipherStash data-service but the worker
 needs direct access.
 
+### Set an Encryption Key
+
+The key must be a 32-byte, hex encoded, cryptographically strong value.
+You can use node to generate one for you:
+
+```
+node -e "let { randomBytes } = require('crypto'); console.log(randomBytes(32).toString('hex'))" \
+| wrangler secret put CIPHERSTASH_KEY
+```
+
 ### Run in Dev
 
 You should be ready to run the demo!
