@@ -19,7 +19,7 @@ getrandom = { version = "0.2", features = ["js"] }
 rand_chacha = "0.3.1"
 hex-literal = "0.3.4"
 hex = "0.4.3"
-cipherstash-client = { version = "0.3.0", path = "/Users/dan/Projects/CipherStash/cipherstash-rs/packages/cipherstash-client" }
+cipherstash-client = { version = "0.4.0-beta.0" }
 # Pin this version as both worker and grpc-web-client use it
 # And if the version is different then we will get linking errors (weird C + WASM shit)
 wasm-streams = { version = "0.2.3" }
