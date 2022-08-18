@@ -5,7 +5,12 @@
     "dob": "date"
   },
   "indexes": {
-    "name": { "kind": "exact", "field": "name" },
+    "name": {
+      "kind": "match",
+      "fields": ["name"],
+      "tokenFilters": [{ "kind": "downcase" }],
+      "tokenizer": { "kind": "ngram", "tokenLength": 3 }
+    },
     "email": {
       "kind": "match",
       "fields": ["email"],
