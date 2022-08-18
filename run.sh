@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 TOKEN=`cat ~/.cipherstash/default/auth-token.json | jq '.accessToken' | sed s/\"//g`
 
 WORKER_BASE_URL=${WORKER_BASE_URL:-"http://localhost:8787"}
@@ -14,7 +16,14 @@ insert_user() {
   echo
 }
 
-# Query Users using 
+# Query Users using the following syntax:
+# {
+#   name:  { op: 'match', value: string },
+#   email: { op: 'match', value: string },
+#   dob: { op: 'lt' | 'lte' | 'gt' | 'gte' | 'eq', value: Date } | { op: 'between', min: Date, max: Date },
+#   limit: number,
+#   offset: number
+# }
 query_users() {
   echo "Sending query $1" 
 
