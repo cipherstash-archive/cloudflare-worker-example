@@ -1,0 +1,23 @@
+{
+  "type": {
+    "name": "string",
+    "email": "string",
+    "dob": "date"
+  },
+  "indexes": {
+    "name": {
+      "kind": "match",
+      "fields": ["name"],
+      "tokenFilters": [{ "kind": "downcase" }],
+      "tokenizer": { "kind": "ngram", "tokenLength": 3 }
+    },
+    "email": {
+      "kind": "match",
+      "fields": ["email"],
+      "tokenFilters": [{ "kind": "downcase" }],
+      "tokenizer": { "kind": "ngram", "tokenLength": 3 }
+    },
+    "exactEmail": { "kind": "exact", "field": "email" },
+    "dob": { "kind": "range", "field": "dob" }
+  }
+}
