@@ -15,14 +15,7 @@ cfg_if! {
     }
 }
 
-pub(crate) fn load_config<D>(env: &Env) -> Result<Config, String> {
-    let collection_id = Uuid::parse_str(
-        &env.var("COLLECTION_ID")
-            .map_err(|_| "Missing Collection ID".to_string())?
-            .to_string(),
-    )
-    .map_err(|_| "Missing Collection ID".to_string())?;
-
+pub(crate) fn load_config(collection_id: Uuid, env: &Env) -> Result<Config, String> {
     let host = &env
         .var("CIPHERSTASH_HOST")
         .map_err(|_| "Missing Host".to_string())?

@@ -19,7 +19,7 @@ getrandom = { version = "0.2", features = ["js"] }
 rand_chacha = "0.3.1"
 hex-literal = "0.3.4"
 hex = "0.4.3"
-cipherstash-client = { version = "0.4.0-beta.0" }
+cipherstash-client = { version = "0.4.0-beta.2" }
 # Pin this version as both worker and grpc-web-client use it
 # And if the version is different then we will get linking errors (weird C + WASM shit)
 wasm-streams = { version = "0.2.3" }
@@ -31,6 +31,7 @@ wasm-bindgen = "0.2.82"
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
 # code size when deploying.
 console_error_panic_hook = { version = "0.1.1", optional = true }
+chrono = { version = "0.4.22", features = [ "serde" ] }
 
 [dependencies.uuid]
 version = "1.1.2"
