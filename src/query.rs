@@ -79,32 +79,32 @@ impl From<DobCondition> for Query {
                 value: match condition {
                     DobCondition::Eq { value } => RangeValue::Single {
                         operator: RangeOperator::Eq,
-                        value: Value::Date(value.timestamp() as f64),
+                        value: Value::Date(value.timestamp_millis() as f64),
                     },
 
                     DobCondition::Lt { value } => RangeValue::Single {
                         operator: RangeOperator::Lt,
-                        value: Value::Date(value.timestamp() as f64),
+                        value: Value::Date(value.timestamp_millis() as f64),
                     },
 
                     DobCondition::Lte { value } => RangeValue::Single {
                         operator: RangeOperator::Lte,
-                        value: Value::Date(value.timestamp() as f64),
+                        value: Value::Date(value.timestamp_millis() as f64),
                     },
 
                     DobCondition::Gt { value } => RangeValue::Single {
                         operator: RangeOperator::Gt,
-                        value: Value::Date(value.timestamp() as f64),
+                        value: Value::Date(value.timestamp_millis() as f64),
                     },
 
                     DobCondition::Gte { value } => RangeValue::Single {
                         operator: RangeOperator::Gte,
-                        value: Value::Date(value.timestamp() as f64),
+                        value: Value::Date(value.timestamp_millis() as f64),
                     },
 
                     DobCondition::Between { min, max } => RangeValue::Between {
-                        min: Value::Date(min.timestamp() as f64),
-                        max: Value::Date(max.timestamp() as f64),
+                        min: Value::Date(min.timestamp_millis() as f64),
+                        max: Value::Date(max.timestamp_millis() as f64),
                     },
                 },
             },
