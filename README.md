@@ -101,8 +101,7 @@ stash export-schema users > users.annotated.json
 *Note: The worker looks for a file called `users.annotated.json` so make sure you use this file name*
 
 The annotated schema includes the IDs and keys used for indexing.
-Normally these are stored encrypted in the CipherStash data-service but the worker
-needs direct access.
+Normally these are stored encrypted in the CipherStash data-service, but the Rust SDK currently requires these as config. This step will be removed in a future version of the Rust SDK.
 
 ### Set an Encryption Key
 
