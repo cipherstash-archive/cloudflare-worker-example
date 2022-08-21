@@ -135,7 +135,7 @@ To load some data into your collection via the worker:
 ### Run Some Queries
 
 The `run.sh` script is used to fetch a record and run some queries.
-It provides a few examples but feel free to change it and experiement:
+It provides a few examples but feel free to change it and experiment:
 
 ```
 ./run.sh
