@@ -77,6 +77,7 @@ stash login --workspace <WORKSPACE-ID>
 
 If your workspace is not in ap-southeast-2 you will need to change the `CIPHERSTASH_HOST` value in `wrangler.toml`.
 It's of the form `https://<region>.aws.stashdata.net`.
+Note that only `ap-southeast-2` and `us-east-1` are currently available.
 
 ### Create a Collection
 
@@ -138,6 +139,13 @@ It provides a few examples but feel free to change it and experiment:
 
 ```
 ./run.sh
+```
+
+By default, `run.sh` will make calls to `http://localhost:8787` but you can specify another host
+via the `WORKER_BASE_URL` environment variable:
+
+```
+WORKER_BASE_URL="http://myworker.foo.workers.dev" ./run.sh
 ```
 
 ## Deployment
