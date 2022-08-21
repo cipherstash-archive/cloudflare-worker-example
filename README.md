@@ -106,7 +106,7 @@ Normally these are stored encrypted in the CipherStash data-service, but the Rus
 ### Set an Encryption Key
 
 The key must be a 32-byte, hex encoded, cryptographically strong value.
-You can use node to generate one for you:
+You can use `node` to generate one for you:
 
 ```
 node -e "let { randomBytes } = require('crypto'); console.log(randomBytes(32).toString('hex'))" \
