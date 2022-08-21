@@ -45,7 +45,7 @@ The worker passes the JWT through to the CipherStash data-service which validate
 
 ### Prerequisites
 
-* Rust 1.62.0 via [Rustup](https://rustup.rs/) (earlier version may work but haven't been tested)
+* Rust 1.62.0 via [Rustup](https://rustup.rs/) (earlier versions may work but haven't been tested)
 * [jq](https://stedolan.github.io/jq/)
 * Node.js 16+ (used for the CipherStash CLI tool)
 * curl (available on most systems)
