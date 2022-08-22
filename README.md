@@ -49,6 +49,8 @@ The worker passes the JWT through to the CipherStash data-service which validate
 * [jq](https://stedolan.github.io/jq/)
 * Node.js 16+ (used for the CipherStash CLI tool)
 * curl (available on most systems)
+* [Wrangler](https://developers.cloudflare.com/workers/wrangler/get-started/#install)
+* [Cloudflare account](https://dash.cloudflare.com/sign-up)
 
 ### Get a CipherStash Workspace
 
@@ -65,6 +67,8 @@ Take a note of the workspace ID - you'll need that shortly.
 ```sh
 npm i -g @cipherstash/stash-cli
 ```
+
+[More info here.](https://docs.cipherstash.com/reference/stash-cli/stash-install-cli.html#step-1-install-dependencies).
 
 ### Login to your workspace
 
@@ -104,10 +108,31 @@ stash export-schema users > users.annotated.json
 The annotated schema includes the IDs and keys used for indexing.
 Normally these are stored encrypted in the CipherStash data-service, but the Rust SDK currently requires these as config. This step will be removed in a future version of the Rust SDK.
 
+### Login to Wrangler
+
+```
+wrangler login
+```
+
+[More info here.](https://developers.cloudflare.com/workers/wrangler/get-started/#authenticate)
+
+### Create a Cloudflare worker
+
+1. Go to the [Cloudflare dashboard](https://dash.cloudflare.com/).
+2. Select `Workers` from the left side menu.
+3. If this is your first time creating a worker, you will be prompted to create a subdomain.
+4. Follow the prompts to create a subdomain if applicable.
+5. Within `Workers`, click `Create Service`.
+6. Name the service as `cipherstash-demo`.
+7. Select `HTTP Router`.
+8. Click `Create service`.
+
 ### Set an Encryption Key
 
 The key must be a 32-byte, hex encoded, cryptographically strong value.
-You can use `node` to generate one for you:
+You can use `node` to generate one for you.
+
+Back in your terminal, run the below:
 
 ```
 node -e "let { randomBytes } = require('crypto'); console.log(randomBytes(32).toString('hex'))" \
