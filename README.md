@@ -139,23 +139,30 @@ node -e "let { randomBytes } = require('crypto'); console.log(randomBytes(32).to
 | wrangler secret put CIPHERSTASH_KEY
 ```
 
-### Run in Dev
+### Publish the demo
 
 You should be ready to run the demo!
 
 ```
-wrangler dev
+wrangler publish
 ```
 
-This will start the worker and make it available at http://localhost:8787
+This will start the worker and make it available on your workers domain.
+
+Since the project is called `cipherstash-demo` the worker should be available at `https://cipherstash-demo.<your subdomain>.workers.dev`.
+
+Note: it's possible to access the worker without publishing by calling `wrangler dev`.
+However, due to execution limits on the free tier some of our example scripts won't complete when run against the local worker.
 
 ### Load some data
 
 To load some data into your collection via the worker:
 
 ```
-./bulk.sh
+./bulk.sh https://cipherstash-demo.<your subdomain>.workers.dev
 ```
+
+The bulk script inserts each record individually so it can take a couple minutes to complete.
 
 ### Run Some Queries
 
@@ -163,22 +170,7 @@ The `run.sh` script is used to fetch a record and run some queries.
 It provides a few examples but feel free to change it and experiment:
 
 ```
-./run.sh
-```
-
-By default, `run.sh` will make calls to `http://localhost:8787` but you can specify another host
-via the `WORKER_BASE_URL` environment variable:
-
-```
-WORKER_BASE_URL="http://myworker.foo.workers.dev" ./run.sh
-```
-
-## Deployment
-
-Deploy your Worker globally to the Cloudflare network (update your wrangler.toml file for configuration)
-
-```
-wrangler publish
+./run.sh https://cipherstash-demo.<your subdomain>.workers.dev
 ```
 
 ## Issues
