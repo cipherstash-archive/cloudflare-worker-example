@@ -1,5 +1,5 @@
 [package]
-name = "cipherstash-cloudflare-demo"
+name = "cipherstash-demo"
 version = "0.1.0"
 authors = ["dan@cipherstash.com"]
 edition = "2018"
@@ -15,17 +15,11 @@ cfg-if = "0.1.2"
 worker = "0.0.10"
 serde = "1.0.143"
 serde_json = "1.0.67"
-getrandom = { version = "0.2", features = ["js"] }
-rand_chacha = "0.3.1"
-hex-literal = "0.3.4"
 hex = "0.4.3"
 cipherstash-client = { version = "0.4.0-beta.2" }
 # Pin this version as both worker and grpc-web-client use it
-# And if the version is different then we will get linking errors (weird C + WASM shit)
+# And if the version is different then we will get linking errors (weird C + WASM issues)
 wasm-streams = { version = "0.2.3" }
-thiserror = "1.0.32"
-wasm-bindgen = "0.2.82"
-
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
