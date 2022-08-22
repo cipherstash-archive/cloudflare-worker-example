@@ -141,7 +141,7 @@ node -e "let { randomBytes } = require('crypto'); console.log(randomBytes(32).to
 
 ### Publish the demo
 
-You should be ready to run the demo! To
+You should be ready to run the demo!
 
 ```
 wrangler publish
